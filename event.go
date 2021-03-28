@@ -20,37 +20,46 @@ type Event struct {
 	// This is a list of all possible payloads.
 	// A choice was made not to use interfaces since it's a pain in the ass asserting each an every payload afterwards
 	// We use pointers so that omitempty works
-	AuthInfo            *EventAuthInfo       `json:"authInfo,omitempty"`
-	Badge               string               `json:"badge,omitempty"`
-	BounceType          string               `json:"bounceType,omitempty"`
-	Bounds              *RectangleOptions    `json:"bounds,omitempty"`
-	CallbackID          string               `json:"callbackId,omitempty"`
-	Code                string               `json:"code,omitempty"`
-	Displays            *EventDisplays       `json:"displays,omitempty"`
-	FilePath            string               `json:"filePath,omitempty"`
-	ID                  *int                 `json:"id,omitempty"`
-	Image               string               `json:"image,omitempty"`
-	Index               *int                 `json:"index,omitempty"`
-	Menu                *EventMenu           `json:"menu,omitempty"`
-	MenuItem            *EventMenuItem       `json:"menuItem,omitempty"`
-	MenuItemOptions     *MenuItemOptions     `json:"menuItemOptions,omitempty"`
-	MenuItemPosition    *int                 `json:"menuItemPosition,omitempty"`
-	MenuPopupOptions    *MenuPopupOptions    `json:"menuPopupOptions,omitempty"`
-	Message             *EventMessage        `json:"message,omitempty"`
-	NotificationOptions *NotificationOptions `json:"notificationOptions,omitempty"`
-	Password            string               `json:"password,omitempty"`
-	Reply               string               `json:"reply,omitempty"`
-	Request             *EventRequest        `json:"request,omitempty"`
-	SecondInstance      *EventSecondInstance `json:"secondInstance,omitempty"`
-	SessionID           string               `json:"sessionId,omitempty"`
-	Supported           *Supported           `json:"supported,omitempty"`
-	TrayOptions         *TrayOptions         `json:"trayOptions,omitempty"`
-	URL                 string               `json:"url,omitempty"`
-	URLNew              string               `json:"newUrl,omitempty"`
-	URLOld              string               `json:"oldUrl,omitempty"`
-	Username            string               `json:"username,omitempty"`
-	WindowID            string               `json:"windowId,omitempty"`
-	WindowOptions       *WindowOptions       `json:"windowOptions,omitempty"`
+	AuthInfo                   *EventAuthInfo                   `json:"authInfo,omitempty"`
+	Badge                      string                           `json:"badge,omitempty"`
+	BounceType                 string                           `json:"bounceType,omitempty"`
+	Bounds                     *RectangleOptions                `json:"bounds,omitempty"`
+	CallbackID                 string                           `json:"callbackId,omitempty"`
+	Code                       string                           `json:"code,omitempty"`
+	Displays                   *EventDisplays                   `json:"displays,omitempty"`
+	FilePath                   string                           `json:"filePath,omitempty"`
+	ID                         *int                             `json:"id,omitempty"`
+	Image                      string                           `json:"image,omitempty"`
+	Index                      *int                             `json:"index,omitempty"`
+	Menu                       *EventMenu                       `json:"menu,omitempty"`
+	MenuItem                   *EventMenuItem                   `json:"menuItem,omitempty"`
+	MenuItemOptions            *MenuItemOptions                 `json:"menuItemOptions,omitempty"`
+	MenuItemPosition           *int                             `json:"menuItemPosition,omitempty"`
+	MenuPopupOptions           *MenuPopupOptions                `json:"menuPopupOptions,omitempty"`
+	Message                    *EventMessage                    `json:"message,omitempty"`
+	NotificationOptions        *NotificationOptions             `json:"notificationOptions,omitempty"`
+	Password                   string                           `json:"password,omitempty"`
+	Reply                      string                           `json:"reply,omitempty"`
+	Request                    *EventRequest                    `json:"request,omitempty"`
+	SecondInstance             *EventSecondInstance             `json:"secondInstance,omitempty"`
+	SessionID                  string                           `json:"sessionId,omitempty"`
+	Supported                  *Supported                       `json:"supported,omitempty"`
+	TrayOptions                *TrayOptions                     `json:"trayOptions,omitempty"`
+	URL                        string                           `json:"url,omitempty"`
+	URLNew                     string                           `json:"newUrl,omitempty"`
+	URLOld                     string                           `json:"oldUrl,omitempty"`
+	Username                   string                           `json:"username,omitempty"`
+	WindowID                   string                           `json:"windowId,omitempty"`
+	WindowOptions              *WindowOptions                   `json:"windowOptions,omitempty"`
+	Urls                       []string                         `json:"urls,omitempty"`
+	OnBeforeRequestDetails     *EventOnBeforeRequestDetails     `json:"onBeforeRequestDetails,omitempty"`
+	OnBeforeSendHeadersDetails *EventOnBeforeSendHeadersDetails `json:"onBeforeSendHeadersDetails,omitempty"`
+	Cancel                     bool                             `json:"cancel,omitempty"`
+	DeleteListener             bool                             `json:"deleteListener,omitempty"`
+	Intercept                  bool                             `json:"intercept,omitempty"`
+	Protocol                   string                           `json:"protocol,omitempty"`
+	ProtocolRequest            *EventProtocolRequest            `json:"protocolRequest,omitempty"`
+	ProtocolResponse           *EventProtocolResponse           `json:"protocolResponse,omitempty"`
 }
 
 // EventAuthInfo represents an event auth info
@@ -71,6 +80,57 @@ type EventDisplays struct {
 // EventMessage represents an event message
 type EventMessage struct {
 	i interface{}
+}
+
+type EventOnBeforeRequestDetails struct {
+	ID           int                `json:"id,omitempty"`
+	URL          string             `json:"url,omitempty"`
+	Method       string             `json:"method,omitempty"`
+	ResourceType string             `json:"resourceType,omitempty"`
+	Referrer     string             `json:"referrer,omitempty"`
+	Timestamp    float64            `json:"timestamp,omitempty"`
+	UploadData   []*EventUploadData `json:"uploadData,omitempty"`
+}
+
+type EventUploadData struct {
+	Bytes []byte `json:"bytes,omitempty"`
+}
+
+type EventOnBeforeSendHeadersDetails struct {
+	ID             int               `json:"id,omitempty"`
+	URL            string            `json:"url,omitempty"`
+	Method         string            `json:"method,omitempty"`
+	ResourceType   string            `json:"resourceType,omitempty"`
+	Referrer       string            `json:"referrer,omitempty"`
+	Timestamp      float64           `json:"timestamp,omitempty"`
+	RequestHeaders map[string]string `json:"requestHeaders,omitempty"`
+}
+
+type EventProtocolRequest struct {
+	URL        string             `json:"url,omitempty"`
+	Referrer   string             `json:"referrer,omitempty"`
+	Method     string             `json:"method,omitempty"`
+	UploadData []*EventUploadData `json:"uploadData,omitempty"`
+	Headers    map[string]string  `json:"headers,omitempty"`
+}
+
+type EventProtocolResponse struct {
+	Error      int                      `json:"error,omitempty"`
+	StatusCode int                      `json:"statusCode,omitempty"`
+	Charset    string                   `json:"charset,omitempty"`
+	MimeType   string                   `json:"mimeType,omitempty"`
+	Headers    map[string]string        `json:"headers,omitempty"`
+	Data       string                   `json:"data,omitempty"`
+	Path       string                   `json:"path,omitempty"`
+	URL        string                   `json:"url,omitempty"`
+	Referrer   string                   `json:"referrer,omitempty"`
+	Method     string                   `json:"method,omitempty"`
+	UploadData *EventProtocolUploadData `json:"uploadData,omitempty"`
+}
+
+type EventProtocolUploadData struct {
+	ContentType string `json:"contentType,omitempty"`
+	Data        string `json:"data,omitempty"`
 }
 
 // newEventMessage creates a new event message

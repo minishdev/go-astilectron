@@ -56,6 +56,12 @@ const (
 	EventNameWindowEventWebContentsExecutedJavaScript = "window.event.web.contents.executed.javascript"
 	EventNameWindowEventWillNavigate                  = "window.event.will.navigate"
 	EventNameWindowEventUpdatedCustomOptions          = "window.event.updated.custom.options"
+	EventNameSessionOnBeforeRequest                   = "session.on.before.request"
+	EventNameOnBeforeRequestCallback                  = "on.before.request.callback"
+	EventNameSessionOnBeforeSendHeaders               = "session.on.before.send.headers"
+	EventNameOnBeforeSendHeadersCallback              = "on.before.send.headers.callback"
+	EventNameInterceptBufferProtocol                  = "intercept.buffer.protocol"
+	EventNameInterceptBufferProtocolCallback          = "intercept.buffer.protocol.callback"
 )
 
 // Title bar styles
@@ -421,6 +427,70 @@ func (w *Window) OnLogin(fn func(i Event) (username, password string, err error)
 		}
 		return
 	})
+}
+
+func (w *Window) OnBeforeRequest(urls []string, c func(i *EventOnBeforeRequestDetails) (bool, bool)) {
+	callbackID := w.callbackIdentifier.new()
+
+	w.On(EventNameSessionOnBeforeRequest, func(i Event) bool {
+		if i.CallbackID == callbackID {
+			cancel, deleteListerner := c(i.OnBeforeRequestDetails)
+
+			if err := w.w.write(Event{CallbackID: i.CallbackID, Name: EventNameOnBeforeRequestCallback, OnBeforeRequestDetails: i.OnBeforeRequestDetails, Cancel: cancel, DeleteListener: deleteListerner, TargetID: w.id}); err != nil {
+				w.l.Error(fmt.Errorf("sending on before request event failed: %w", err))
+			}
+
+			return deleteListerner
+		}
+		return false
+	})
+
+	if err := w.w.write(Event{Name: EventNameSessionOnBeforeRequest, TargetID: w.id, Urls: urls, CallbackID: callbackID}); err != nil {
+		w.l.Error(fmt.Errorf("sending on before request event failed: %w", err))
+		return
+	}
+}
+
+func (w *Window) OnBeforeSendHeaders(urls []string, c func(i *EventOnBeforeSendHeadersDetails) (bool, bool)) {
+	callbackID := w.callbackIdentifier.new()
+
+	w.On(EventNameSessionOnBeforeSendHeaders, func(i Event) bool {
+		if i.CallbackID == callbackID {
+			cancel, deleteListerner := c(i.OnBeforeSendHeadersDetails)
+
+			if err := w.w.write(Event{CallbackID: i.CallbackID, Name: EventNameOnBeforeSendHeadersCallback, OnBeforeSendHeadersDetails: i.OnBeforeSendHeadersDetails, Cancel: cancel, DeleteListener: deleteListerner, TargetID: w.id}); err != nil {
+				w.l.Error(fmt.Errorf("sending on before send headers event failed: %w", err))
+			}
+
+			return deleteListerner
+		}
+		return false
+	})
+
+	if err := w.w.write(Event{Name: EventNameSessionOnBeforeSendHeaders, TargetID: w.id, Urls: urls, CallbackID: callbackID}); err != nil {
+		w.l.Error(fmt.Errorf("sending on before send headers event failed: %w", err))
+		return
+	}
+}
+
+func (w *Window) InterceptBufferProtocol(protocol string, c func(i *EventProtocolRequest) (*EventProtocolResponse, bool)) {
+	callbackID := w.callbackIdentifier.new()
+
+	w.On(EventNameInterceptBufferProtocol, func(i Event) bool {
+		if i.CallbackID == callbackID {
+			protocolResponse, intercept := c(i.ProtocolRequest)
+
+			if err := w.w.write(Event{CallbackID: i.CallbackID, Name: EventNameInterceptBufferProtocolCallback, ProtocolResponse: protocolResponse, Intercept: intercept, TargetID: w.id}); err != nil {
+				w.l.Error(fmt.Errorf("sending intercept buffer protocol event failed: %w", err))
+			}
+		}
+		return false
+	})
+
+	if err := w.w.write(Event{Name: EventNameInterceptBufferProtocol, TargetID: w.id, Protocol: protocol, CallbackID: callbackID}); err != nil {
+		w.l.Error(fmt.Errorf("sending intercept buffer protocol event failed: %w", err))
+		return
+	}
 }
 
 // ListenerMessage represents a message listener executed when receiving a message from the JS
